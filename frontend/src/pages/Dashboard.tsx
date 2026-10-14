@@ -155,6 +155,9 @@ const Dashboard: React.FC = () => {
     const [tPriority,     setTPriority]     = useState<Task['priority']>('medium');
     const [tDue,          setTDue]          = useState('');
     const [tAssign,       setTAssign]       = useState<number|null>(null);
+    const [showInlineCat, setShowInlineCat] = useState(false);
+    const [inlineCatName, setInlineCatName] = useState('');
+    const [creatingCat,   setCreatingCat]   = useState(false);
 
     /* ── load ── */
     const load = async () => {
@@ -203,21 +206,46 @@ const Dashboard: React.FC = () => {
         try { await api.delete(`/categories/${id}`); } catch { load(); }
     };
 
+    const handleCreateInlineCat = async () => {
+        if (!inlineCatName.trim()) return;
+        setCreatingCat(true);
+        try {
+            const r = await api.post('/categories', { name: inlineCatName.trim(), color: '#10b981' });
+            const newCat = r.data.category;
+            setCategories(cs => [...cs, newCat]);
+            setTCat(newCat.id);
+            setInlineCatName('');
+            setShowInlineCat(false);
+        } catch {
+            alert('Failed to create workspace');
+        } finally {
+            setCreatingCat(false);
+        }
+    };
+
     const openAddTask = () => {
         setEditTask(null); setTTitle(''); setTDesc('');
         setTCat(selCat || categories[0]?.id || 0);
         setTPriority('medium'); setTDue(''); setTAssign(null);
+        setShowInlineCat(categories.length === 0);
+        setInlineCatName('');
         setShowTaskModal(true);
     };
     const openEditTask = (t: Task) => {
         setEditTask(t); setTTitle(t.title); setTDesc(t.description||'');
         setTCat(t.category_id); setTPriority(t.priority);
         setTDue(t.due_date ? t.due_date.slice(0,10) : '');
-        setTAssign(t.assigned_to); setShowTaskModal(true);
+        setTAssign(t.assigned_to);
+        setShowInlineCat(false);
+        setShowTaskModal(true);
     };
     const submitTask = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!tCat) { alert('Create a category first.'); return; }
+        if (!tCat) {
+            setShowInlineCat(true);
+            alert('Please create or select a workspace first.');
+            return;
+        }
         setSubmitting(true);
         const body: any = { title: tTitle, description: tDesc||null, category_id: tCat, priority: tPriority, due_date: tDue||null };
         try {
@@ -425,7 +453,6 @@ const Dashboard: React.FC = () => {
                             {filtered.map(task => {
                                 const cat = categories.find(c=>c.id===task.category_id);
                                 const assignee = users.find(u=>u.id===task.assigned_to);
-                                const sCfg = STATUS[task.status];
                                 const pCfg = PRIORITY[task.priority];
                                 return (
                                     <div key={task.id} style={{ background:C.card, border:`1px solid ${C.border}`, borderRadius:14, padding:'16px', display:'flex', flexDirection:'column', transition:'border-color 0.15s, transform 0.15s' }}
@@ -563,10 +590,69 @@ const Dashboard: React.FC = () => {
                             </div>
                             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                                 <div>
-                                    <label style={labelSt}>Workspace</label>
-                                    <select value={tCat} onChange={e=>setTCat(Number(e.target.value))} style={inputSt}>
-                                        {categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
-                                    </select>
+                                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6 }}>
+                                        <label style={{ ...labelSt, marginBottom:0 }}>Workspace *</label>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowInlineCat(v => !v)}
+                                            style={{ background:'none', border:'none', color:C.accent, fontSize:11, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', gap:3, padding:0 }}
+                                        >
+                                            <Plus size={12} /> {showInlineCat ? 'Cancel' : 'New'}
+                                        </button>
+                                    </div>
+                                    {showInlineCat && (
+                                        <div style={{ display:'flex', gap:6, marginBottom:6 }}>
+                                            <input
+                                                type="text"
+                                                value={inlineCatName}
+                                                onChange={e => setInlineCatName(e.target.value)}
+                                                placeholder="New workspace..."
+                                                style={{ ...inputSt, padding:'7px 10px', fontSize:13 }}
+                                                autoFocus
+                                                onKeyDown={e => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        handleCreateInlineCat();
+                                                    }
+                                                }}
+                                            />
+                                            <button
+                                                type="button"
+                                                disabled={creatingCat || !inlineCatName.trim()}
+                                                onClick={handleCreateInlineCat}
+                                                style={{
+                                                    padding:'7px 12px', borderRadius:10,
+                                                    background:`linear-gradient(135deg,${C.accent},#059669)`,
+                                                    border:'none', color:'white', fontWeight:700, fontSize:12,
+                                                    cursor:'pointer', whiteSpace:'nowrap',
+                                                    opacity: (creatingCat || !inlineCatName.trim()) ? 0.6 : 1
+                                                }}
+                                            >
+                                                {creatingCat ? 'Adding...' : 'Add'}
+                                            </button>
+                                        </div>
+                                    )}
+                                    {(!showInlineCat || categories.length > 0) && (
+                                        <select
+                                            value={tCat || ''}
+                                            onChange={e => setTCat(Number(e.target.value))}
+                                            style={{
+                                                ...inputSt,
+                                                borderColor: (categories.length === 0 && !showInlineCat) ? '#ef4444' : C.border
+                                            }}
+                                        >
+                                            {categories.length === 0 ? (
+                                                <option value="" disabled>⚠️ No workspace - click "+ New" above</option>
+                                            ) : (
+                                                categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)
+                                            )}
+                                        </select>
+                                    )}
+                                    {categories.length === 0 && !showInlineCat && (
+                                        <p style={{ color:'#ef4444', fontSize:11, margin:'4px 0 0' }}>
+                                            Please click "+ New" above to add a workspace.
+                                        </p>
+                                    )}
                                 </div>
                                 <div>
                                     <label style={labelSt}>Priority</label>

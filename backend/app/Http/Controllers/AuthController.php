@@ -23,6 +23,12 @@ class AuthController extends Controller
 
         $token = $user->createToken("auth_token")->plainTextToken;
 
+        // Automatically create a default workspace for new user
+        $user->categories()->create([
+            "name" => "General",
+            "color" => "#10b981",
+        ]);
+
         return response()->json([
             "token"=> $token,
             "user"=> new UserResource($user)
