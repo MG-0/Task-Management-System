@@ -97,36 +97,37 @@ const Profile: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-slate-950 text-white font-sans">
-            <div className="max-w-3xl mx-auto px-4 py-8">
+            <div className="max-w-3xl mx-auto px-3.5 py-6 sm:px-6 sm:py-8">
                 {/* Header */}
-                <div className="flex items-center space-x-4 mb-8">
+                <div className="flex items-center space-x-3.5 sm:space-x-4 mb-6 sm:mb-8">
                     <button 
                         onClick={() => navigate('/')}
-                        className="p-2 bg-slate-900 border border-slate-800 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-all duration-200"
+                        className="p-2 bg-slate-900 border border-slate-800 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-all duration-200 cursor-pointer"
+                        title="Back to Dashboard"
                     >
                         <ArrowLeft className="h-5 w-5" />
                     </button>
                     <div>
-                        <h1 className="text-3xl font-extrabold tracking-tight">Profile Settings</h1>
-                        <p className="text-slate-400 text-sm mt-0.5">Manage your personal profile and account settings</p>
+                        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Profile Settings</h1>
+                        <p className="text-slate-400 text-xs sm:text-sm mt-0.5">Manage your personal profile and account settings</p>
                     </div>
                 </div>
 
                 {/* Notifications */}
                 {error && (
-                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-6 text-sm">
+                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3.5 sm:p-4 rounded-xl mb-6 text-sm">
                         {error}
                     </div>
                 )}
                 {success && (
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl mb-6 text-sm">
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-3.5 sm:p-4 rounded-xl mb-6 text-sm">
                         {success}
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Left: Avatar Upload Card */}
-                    <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-xl">
+                    <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-5 sm:p-6 flex flex-col items-center justify-center text-center shadow-xl">
                         <h3 className="text-lg font-bold mb-4">Profile Photo</h3>
                         
                         <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
@@ -168,7 +169,7 @@ const Profile: React.FC = () => {
                     </div>
 
                     {/* Right: Profile Details Form */}
-                    <div className="md:col-span-2 bg-slate-900/50 border border-slate-800/80 rounded-2xl p-8 shadow-xl">
+                    <div className="md:col-span-2 bg-slate-900/50 border border-slate-800/80 rounded-2xl p-5 sm:p-8 shadow-xl">
                         <form onSubmit={handleProfileSubmit} className="space-y-6">
                             <div className="space-y-4">
                                 <h3 className="text-lg font-bold border-b border-slate-800 pb-2 text-indigo-400">Personal Information</h3>
@@ -204,7 +205,7 @@ const Profile: React.FC = () => {
                                 <h3 className="text-lg font-bold border-b border-slate-800 pb-2 text-indigo-400">Change Password</h3>
                                 <p className="text-slate-500 text-xs">Leave blank if you do not want to change your password.</p>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="text-left">
                                         <label className="block text-slate-400 text-sm mb-1.5 font-medium flex items-center">
                                             <Lock className="h-4 w-4 mr-2 text-indigo-500" /> New Password
@@ -233,11 +234,11 @@ const Profile: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="pt-6 border-t border-slate-850 flex justify-end">
+                            <div className="pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row justify-end">
                                 <button 
                                     type="submit" 
                                     disabled={loadingProfile}
-                                    className="flex items-center justify-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-lg font-semibold shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none disabled:transform-none"
+                                    className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-lg font-semibold shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none disabled:transform-none cursor-pointer"
                                 >
                                     {loadingProfile ? (
                                         <>

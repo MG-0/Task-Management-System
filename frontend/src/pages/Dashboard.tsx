@@ -4,7 +4,7 @@ import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import {
     LogOut, Settings, FolderPlus, Plus, Edit2, Trash2,
-    Calendar, X, Loader2, Sparkles,
+    Calendar, X, Loader2, Sparkles, Menu,
     Filter, CheckCircle2, Circle, Clock4, ChevronDown, RefreshCw
 } from 'lucide-react';
 
@@ -140,6 +140,7 @@ const Dashboard: React.FC = () => {
     const [loading,    setLoading]    = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error,      setError]      = useState('');
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     /* modals */
     const [showCatModal,  setShowCatModal]  = useState(false);
@@ -290,17 +291,40 @@ const Dashboard: React.FC = () => {
     };
 
     return (
-        <div style={{ display:'flex', height:'100vh', overflow:'hidden', background:C.bg, ...s }}>
+        <div style={{ display:'flex', height:'100vh', overflow:'hidden', background:C.bg, ...s }} className="relative">
+
+            {/* Mobile Backdrop */}
+            {sidebarOpen && (
+                <div
+                    onClick={() => setSidebarOpen(false)}
+                    className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm md:hidden transition-opacity duration-200"
+                />
+            )}
 
             {/* ═══ SIDEBAR ═══ */}
-            <div style={{ width:260, display:'flex', flexDirection:'column', background:C.sidebar, borderRight:`1px solid ${C.border}`, flexShrink:0 }}>
+            <div
+                className={`fixed inset-y-0 left-0 z-50 md:static transition-transform duration-200 ease-in-out md:translate-x-0 ${
+                    sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+                }`}
+                style={{ width:260, display:'flex', flexDirection:'column', background:C.sidebar, borderRight:`1px solid ${C.border}`, flexShrink:0, height:'100%' }}
+            >
 
                 {/* Brand */}
-                <div style={{ padding:'20px 18px', borderBottom:`1px solid ${C.border}`, display:'flex', alignItems:'center', gap:10 }}>
-                    <div style={{ width:32, height:32, borderRadius:10, background:`linear-gradient(135deg,${C.accent},#059669)`, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:`0 0 20px ${C.accentDim}` }}>
-                        <Sparkles size={15} color="white" />
+                <div style={{ padding:'18px 16px', borderBottom:`1px solid ${C.border}`, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                        <div style={{ width:32, height:32, borderRadius:10, background:`linear-gradient(135deg,${C.accent},#059669)`, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:`0 0 20px ${C.accentDim}` }}>
+                            <Sparkles size={15} color="white" />
+                        </div>
+                        <span style={{ fontWeight:800, fontSize:17, color:C.textPrimary, letterSpacing:'-0.03em' }}>TaskFlow</span>
                     </div>
-                    <span style={{ fontWeight:800, fontSize:17, color:C.textPrimary, letterSpacing:'-0.03em' }}>TaskFlow</span>
+                    {/* Mobile Close Button */}
+                    <button
+                        onClick={() => setSidebarOpen(false)}
+                        className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 border border-transparent cursor-pointer"
+                        title="Close Menu"
+                    >
+                        <X size={18} />
+                    </button>
                 </div>
 
                 {/* User */}
@@ -335,7 +359,7 @@ const Dashboard: React.FC = () => {
                 <div style={{ flex:1, overflowY:'auto', padding:'10px 8px' }}>
                     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'4px 8px 8px' }}>
                         <span style={{ fontSize:10, fontWeight:700, color:C.textMuted, textTransform:'uppercase', letterSpacing:'0.1em' }}>Workspaces</span>
-                        <button onClick={openAddCat} title="New" style={{ padding:4, borderRadius:6, background:'none', border:'none', color:C.textSub, cursor:'pointer' }}
+                        <button onClick={() => { openAddCat(); setSidebarOpen(false); }} title="New" style={{ padding:4, borderRadius:6, background:'none', border:'none', color:C.textSub, cursor:'pointer' }}
                             onMouseEnter={e=>(e.currentTarget.style.color=C.accent)} onMouseLeave={e=>(e.currentTarget.style.color=C.textSub)}>
                             <FolderPlus size={13} />
                         </button>
@@ -345,7 +369,7 @@ const Dashboard: React.FC = () => {
                     {(() => {
                         const active = selCat === null;
                         return (
-                            <button onClick={() => setSelCat(null)} style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 10px', borderRadius:8, background: active ? C.accentDim : 'none', border: active ? `1px solid ${C.accentBorder}` : '1px solid transparent', color: active ? C.accent : C.textSub, cursor:'pointer', marginBottom:2, transition:'all 0.15s', textAlign:'left' }}>
+                            <button onClick={() => { setSelCat(null); setSidebarOpen(false); }} style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 10px', borderRadius:8, background: active ? C.accentDim : 'none', border: active ? `1px solid ${C.accentBorder}` : '1px solid transparent', color: active ? C.accent : C.textSub, cursor:'pointer', marginBottom:2, transition:'all 0.15s', textAlign:'left' }}>
                                 <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                                     <Filter size={13} />
                                     <span style={{ fontSize:13, fontWeight:500 }}>All Tasks</span>
@@ -358,7 +382,7 @@ const Dashboard: React.FC = () => {
                     {categories.map(cat => {
                         const active = selCat === cat.id;
                         return (
-                            <button key={cat.id} onClick={() => setSelCat(cat.id)} style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 10px', borderRadius:8, background: active ? 'rgba(255,255,255,0.04)' : 'none', border:`1px solid ${active ? C.border : 'transparent'}`, color: active ? C.textPrimary : C.textSub, cursor:'pointer', marginBottom:2, transition:'all 0.15s', textAlign:'left' }}
+                            <button key={cat.id} onClick={() => { setSelCat(cat.id); setSidebarOpen(false); }} style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 10px', borderRadius:8, background: active ? 'rgba(255,255,255,0.04)' : 'none', border:`1px solid ${active ? C.border : 'transparent'}`, color: active ? C.textPrimary : C.textSub, cursor:'pointer', marginBottom:2, transition:'all 0.15s', textAlign:'left' }}
                                 onMouseEnter={e=>{ if(!active){ e.currentTarget.style.background='rgba(255,255,255,0.03)'; e.currentTarget.style.color=C.textPrimary; }}}
                                 onMouseLeave={e=>{ if(!active){ e.currentTarget.style.background='none'; e.currentTarget.style.color=C.textSub; }}}>
                                 <div style={{ display:'flex', alignItems:'center', gap:8, minWidth:0 }}>
@@ -401,26 +425,41 @@ const Dashboard: React.FC = () => {
             <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
 
                 {/* Topbar */}
-                <div style={{ padding:'16px 28px', borderBottom:`1px solid ${C.border}`, background:C.sidebar, display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0 }}>
-                    <div>
-                        <h1 style={{ fontSize:18, fontWeight:700, color:C.textPrimary, margin:0, letterSpacing:'-0.02em' }}>
-                            {selCat ? categories.find(c=>c.id===selCat)?.name : 'All Tasks'}
-                        </h1>
-                        <p style={{ fontSize:12, color:C.textSub, margin:'2px 0 0' }}>{filtered.length} task{filtered.length!==1?'s':''}</p>
+                <div
+                    className="px-3.5 py-3 sm:px-7 sm:py-4 flex items-center justify-between flex-shrink-0"
+                    style={{ borderBottom:`1px solid ${C.border}`, background:C.sidebar }}
+                >
+                    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                        {/* Mobile Hamburger Button */}
+                        <button
+                            type="button"
+                            onClick={() => setSidebarOpen(true)}
+                            className="md:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer transition-colors"
+                            title="Open Workspaces"
+                        >
+                            <Menu size={18} />
+                        </button>
+                        <div>
+                            <h1 style={{ fontSize:17, fontWeight:700, color:C.textPrimary, margin:0, letterSpacing:'-0.02em' }} className="truncate max-w-[130px] xs:max-w-[180px] sm:max-w-none">
+                                {selCat ? categories.find(c=>c.id===selCat)?.name : 'All Tasks'}
+                            </h1>
+                            <p style={{ fontSize:11, color:C.textSub, margin:'2px 0 0' }}>{filtered.length} task{filtered.length!==1?'s':''}</p>
+                        </div>
                     </div>
-                    <div style={{ display:'flex', gap:8 }}>
-                        <button onClick={load} style={{ padding:'8px 12px', borderRadius:9, background:C.card, border:`1px solid ${C.border}`, color:C.textSub, cursor:'pointer', display:'flex', alignItems:'center', gap:6 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                        <button onClick={load} title="Refresh" style={{ padding:'8px 10px', borderRadius:9, background:C.card, border:`1px solid ${C.border}`, color:C.textSub, cursor:'pointer', display:'flex', alignItems:'center', gap:6 }}>
                             <RefreshCw size={14} />
                         </button>
-                        <button onClick={openAddTask} style={{ padding:'9px 18px', borderRadius:9, background:`linear-gradient(135deg,${C.accent},#059669)`, border:'none', color:'white', fontWeight:700, fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', gap:6, boxShadow:`0 4px 18px ${C.accentDim}` }}>
+                        <button onClick={openAddTask} style={{ padding:'8px 14px', borderRadius:9, background:`linear-gradient(135deg,${C.accent},#059669)`, border:'none', color:'white', fontWeight:700, fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', gap:6, boxShadow:`0 4px 18px ${C.accentDim}` }}>
                             <Plus size={15} />
-                            <span>New Task</span>
+                            <span className="hidden sm:inline">New Task</span>
+                            <span className="inline sm:hidden">Task</span>
                         </button>
                     </div>
                 </div>
 
                 {/* Content */}
-                <div style={{ flex:1, overflowY:'auto', padding:'24px 28px' }}>
+                <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 md:p-7">
                     {loading ? (
                         <div style={{ height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:12 }}>
                             <Loader2 size={28} color={C.accent} style={{ animation:'spin 1s linear infinite' }} />
@@ -449,7 +488,7 @@ const Dashboard: React.FC = () => {
                             </div>
                         </div>
                     ) : (
-                        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(300px, 1fr))', gap:14 }}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                             {filtered.map(task => {
                                 const cat = categories.find(c=>c.id===task.category_id);
                                 const assignee = users.find(u=>u.id===task.assigned_to);
@@ -529,9 +568,9 @@ const Dashboard: React.FC = () => {
 
             {/* ═══ CATEGORY MODAL ═══ */}
             {showCatModal && (
-                <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:50, padding:16 }}>
-                    <div style={{ background:'#0f0f0f', border:`1px solid ${C.border}`, borderRadius:18, width:'100%', maxWidth:420, boxShadow:'0 25px 60px rgba(0,0,0,0.7)' }}>
-                        <div style={{ padding:'18px 20px', borderBottom:`1px solid ${C.border}`, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:60, padding:12 }}>
+                    <div style={{ background:'#0f0f0f', border:`1px solid ${C.border}`, borderRadius:18, width:'100%', maxWidth:420, boxShadow:'0 25px 60px rgba(0,0,0,0.7)', maxHeight:'90vh', overflowY:'auto' }}>
+                        <div style={{ padding:'18px 20px', borderBottom:`1px solid ${C.border}`, display:'flex', alignItems:'center', justifyContent:'space-between', position:'sticky', top:0, background:'#0f0f0f', zIndex:1 }}>
                             <h3 style={{ fontWeight:700, color:C.textPrimary, margin:0, fontSize:15 }}>{editCat ? 'Edit Workspace' : 'New Workspace'}</h3>
                             <button onClick={()=>setShowCatModal(false)} style={{ padding:6, borderRadius:7, background:'none', border:'none', color:C.textSub, cursor:'pointer' }}>
                                 <X size={16} />
@@ -547,10 +586,10 @@ const Dashboard: React.FC = () => {
                             </div>
                             <div>
                                 <label style={labelSt}>Color</label>
-                                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                                <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
                                     <input type="color" value={catColor} onChange={e=>setCatColor(e.target.value)}
                                         style={{ width:40, height:40, borderRadius:8, border:'none', cursor:'pointer', background:'none' }} />
-                                    <div style={{ display:'flex', gap:8 }}>
+                                    <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
                                         {['#10b981','#6366f1','#3b82f6','#f59e0b','#ef4444','#ec4899'].map(c=>(
                                             <button key={c} type="button" onClick={()=>setCatColor(c)} style={{ width:24, height:24, borderRadius:'50%', background:c, border: catColor===c ? '2px solid white' : '2px solid transparent', cursor:'pointer', outline:'none' }} />
                                         ))}
@@ -567,7 +606,7 @@ const Dashboard: React.FC = () => {
 
             {/* ═══ TASK MODAL ═══ */}
             {showTaskModal && (
-                <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:50, padding:16 }}>
+                <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:60, padding:12 }}>
                     <div style={{ background:'#0f0f0f', border:`1px solid ${C.border}`, borderRadius:18, width:'100%', maxWidth:480, boxShadow:'0 25px 60px rgba(0,0,0,0.7)', maxHeight:'90vh', overflowY:'auto' }}>
                         <div style={{ padding:'18px 20px', borderBottom:`1px solid ${C.border}`, display:'flex', alignItems:'center', justifyContent:'space-between', position:'sticky', top:0, background:'#0f0f0f', zIndex:1 }}>
                             <h3 style={{ fontWeight:700, color:C.textPrimary, margin:0, fontSize:15 }}>{editTask ? 'Edit Task' : 'New Task'}</h3>
@@ -588,12 +627,12 @@ const Dashboard: React.FC = () => {
                                     style={{...inputSt, resize:'none'}}
                                     onFocus={e=>(e.target.style.borderColor=C.accentBorder)} onBlur={e=>(e.target.style.borderColor=C.border)} />
                             </div>
-                            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6 }}>
                                         <label style={{ ...labelSt, marginBottom:0 }}>Workspace *</label>
                                         <button
-                                            type="button"
+                                             type="button"
                                             onClick={() => setShowInlineCat(v => !v)}
                                             style={{ background:'none', border:'none', color:C.accent, fontSize:11, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', gap:3, padding:0 }}
                                         >
@@ -663,7 +702,7 @@ const Dashboard: React.FC = () => {
                                     </select>
                                 </div>
                             </div>
-                            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label style={labelSt}>Due Date</label>
                                     <input type="date" value={tDue} onChange={e=>setTDue(e.target.value)} style={{...inputSt, colorScheme:'dark'}} />
