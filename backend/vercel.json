@@ -15,6 +15,7 @@
   ],
   "env": {
     "APP_ENV": "production",
+    "APP_DEBUG": "true",
     "APP_CONFIG_CACHE": "/tmp/storage/framework/config.php",
     "APP_EVENTS_CACHE": "/tmp/storage/framework/events.php",
     "APP_PACKAGES_CACHE": "/tmp/storage/framework/packages.php",

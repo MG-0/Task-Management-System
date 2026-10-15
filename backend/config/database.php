@@ -99,7 +99,6 @@ return [
             'sslmode' => env('DB_SSLMODE', 'prefer'),
             // Reduce Neon serverless cold-start latency
             'options' => [
-                PDO::ATTR_PERSISTENT => true,
                 PDO::ATTR_TIMEOUT => 8,
             ],
         ],
