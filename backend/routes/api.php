@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TaskController;
+use App\Http\Resources\UserResource;
 
 
 Route::get('/test', function(){
@@ -16,7 +17,7 @@ Route::get('/test', function(){
 
 
 Route::get('/user', function (Request $request) {
-    return $request->user();
+    return new UserResource($request->user());
 })->middleware('auth:sanctum');
 
 Route::post('/register', [AuthController::class, 'register'] );
@@ -32,7 +33,7 @@ Route::apiResource('tasks', TaskController::class);
 Route::patch('/tasks/{task}/assign', [TaskController::class, 'assign']);
 Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus']);
  Route::get('/users', function() {
-     return response()->json(['users' => \App\Models\User::all()]);
+     return response()->json(['users' => UserResource::collection(\App\Models\User::all())]);
  });
 });
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
